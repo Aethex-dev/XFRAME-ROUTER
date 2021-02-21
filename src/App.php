@@ -6,7 +6,7 @@ class App {
 
     function test() {
     
-        return "Success";
+        return "Success, Application loaded!";
     
     }
 
