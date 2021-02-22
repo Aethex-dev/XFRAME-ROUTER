@@ -6,7 +6,7 @@ class App {
 
     function test() {
     
-        return "Success, Application loaded!";
+        return "Success, Application loaded! XENONMC";
     
     }
 
