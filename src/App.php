@@ -4,6 +4,7 @@ namespace xframe\Router;
 
 class App {
 
+    // get requested url
     function get_url():array {
 
         $unparsed = $_SERVER['REQUEST_URI'] ?? '/';
