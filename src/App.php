@@ -16,11 +16,12 @@ class App {
         $unparsed = $_SERVER['REQUEST_URI'] ?? '/';
 
         if($unparsed === '/') {
-            $parsed = array('/');
+            $parsed = array_pad(array('/'), 20, "");
         } else {
-            $unparsed = explode("/", $unparsed);
+            $unparsed = array_pad(explode("/", $unparsed, 20), 20, "");
             array_shift($unparsed);
             $parsed = $unparsed;
+
         }
 
         return $parsed;
@@ -57,11 +58,26 @@ class App {
 
     function app_exists($app) {
 
-        if(file_exists(str_replace('\\', '/', __DIR__)) . '/src/apps/' . $this->get_request_app() . '/App.php') {
+        if(file_exists(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'])) . '/src/apps/' . $this->get_request_app() . '/App.php') {
             return true;
         }
 
         return false;
+
+    }
+
+    /** 
+     * get all applications
+     * 
+     * @return array, array of all the applications
+     * 
+    */
+
+    function get_all_apps() {
+
+        foreach(scandir(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']) . '/src/apps/') as $app) {
+            echo $app;
+        }
 
     }
 
@@ -76,7 +92,7 @@ class App {
 
         $url = $this->get_url();
 
-        if(strlen($url) > 1) {
+        if(strlen($url[1]) > 1) {
             return true;
         }
 
@@ -93,13 +109,30 @@ class App {
 
     function get_request_action() {
 
-        $url = $this->get_request_url();
+        $url = $this->get_url();
 
         if($this->action_isset($url[1])) {
             return $url[1];
         }
 
         return 'Main';
+
+    }
+
+    /** 
+     * get application config
+     * 
+     * @param string, name of the application
+     * 
+     * @return array, json data
+     * 
+    */
+
+    function get_app_config($app) {
+
+        $config = file_get_contents(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']) . '/src/apps/' . $app . '/config.json');
+        $json = json_decode($config);
+        return $json;
 
     }
 
