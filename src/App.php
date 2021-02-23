@@ -36,10 +36,26 @@ class App {
 
         if($url[0] == '/') {
             return 'index';
-        } else {
-            return $url[0];
         }
         
+        return $url[0];
+        
+    }
+
+    /** 
+     * check if application exists
+     * @param string, app name
+     * 
+    */
+
+    function app_exists($app) {
+
+        if(file_exists()) {
+            return true;
+        }
+
+        return false;
+
     }
 
 }
