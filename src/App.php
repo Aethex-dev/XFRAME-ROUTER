@@ -51,7 +51,7 @@ class App {
      * 
      * @param string, app name
      * 
-     * @return bool
+     * @return bool, returns if the application name exists
      * 
     */
 
@@ -66,10 +66,29 @@ class App {
     }
 
     /** 
+     * check if the url action parameter was intensionally set
+     * 
+     * @return bool, returns if the action url parameter was intentionally set
+     * 
+    */
+
+    /** 
      * get requested action
      * 
      * @return string, name of the action
      * 
     */
+
+    function get_requested_action() {
+
+        $url = $this->get_request_url();
+
+        if($this->action_set($url[1])) {
+            return $url[1];
+        }
+
+        return 'Main';
+
+    }
 
 }
