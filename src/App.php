@@ -91,7 +91,7 @@ class App {
      * 
     */
 
-    function get_requested_action() {
+    function get_request_action() {
 
         $url = $this->get_request_url();
 
