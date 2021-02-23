@@ -30,12 +30,12 @@ class App {
      * 
     */
 
-    function get_request_app() {
+    function get_request_app($home_app = 'index') {
 
         $url = $this->get_url();
 
         if($url[0] == '/') {
-            return 'index';
+            return $home_app;
         }
         
         return $url[0];
@@ -50,7 +50,7 @@ class App {
 
     function app_exists($app) {
 
-        if(file_exists()) {
+        if(file_exists(str_replace('\\', '/', __DIR__)) . '/src/apps/' . $this->get_request_app() . '/App.php') {
             return true;
         }
 
