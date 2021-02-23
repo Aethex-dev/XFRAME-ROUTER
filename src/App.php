@@ -66,11 +66,23 @@ class App {
     }
 
     /** 
-     * check if the url action parameter was intensionally set
+     * check if the url action parameter was set
      * 
-     * @return bool, returns if the action url parameter was intentionally set
+     * @return bool, returns if the action url parameter was set
      * 
     */
+
+    function action_isset() {
+
+        $url = $this->get_url();
+
+        if(strlen($url) > 1) {
+            return true;
+        }
+
+        return false;
+
+    }
 
     /** 
      * get requested action
@@ -83,7 +95,7 @@ class App {
 
         $url = $this->get_request_url();
 
-        if($this->action_set($url[1])) {
+        if($this->action_isset($url[1])) {
             return $url[1];
         }
 
