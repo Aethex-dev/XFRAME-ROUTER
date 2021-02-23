@@ -7,6 +7,8 @@ class App {
     /** 
      * get requested url
      * 
+     * @return array, array of url parameters
+     * 
     */
 
     function get_url() {
@@ -28,6 +30,8 @@ class App {
     /** 
      * get requested application
      * 
+     * @return string, name of the requested application
+     * 
     */
 
     function get_request_app($home_app = 'index') {
@@ -44,7 +48,10 @@ class App {
 
     /** 
      * check if application exists
+     * 
      * @param string, app name
+     * 
+     * @return bool
      * 
     */
 
@@ -57,5 +64,12 @@ class App {
         return false;
 
     }
+
+    /** 
+     * get requested action
+     * 
+     * @return string, name of the action
+     * 
+    */
 
 }
