@@ -1,266 +1,231 @@
 <?php
 
-/** 
- * Package Name: Cache
- * Authors: XFRAME XENONMC
- * License: MIT
- * 
-*/
+namespace xframe\Router;
 
-namespace xframe\Cache;
-
-class App {
+class App
+{
 
     /** 
-     * cache root path
+     * get requested url
      * 
-    */
-
-    private $cache_path = 'internal_data/cache/';
-
-    /** 
-     * create cache group
+     * @return array, array of url parameters
      * 
-     * @param string, cache group name
-     * 
-     * @return boolean, returns if the group was created
-     * 
-    */
+     */
 
-    function mkgroup($cache_name) {
+    function get_url()
+    {
 
-        // error handling
-        if(file_exists($this->cache_path . $cache_name)) {
+        // get unparsed uri
+        $path = $_SERVER['REQUEST_URI'];
 
-            error("Cache Controller: The cache group [ $cache_name ] already exists.");
-            return false;
+        $unparsed = $path;
 
+        // split url to array
+        if ($unparsed === '/') {
+
+            $parsed = array_pad(array('/'), 20, "");
+        } else {
+
+            $unparsed = array_pad(explode("/", $unparsed, 20), 20, "");
+            array_shift($unparsed);
+            $parsed = $unparsed;
         }
 
-        // create group
-        if(mkdir($this->cache_path . $cache_name)) {
+        // set empty values for left over url segments
+        for ($i = 0; $i == 20; $i++) {
 
-            return true;
+            if (!isset($parsed[$i])) {
 
+                $parsed[$i] = "";
+            }
         }
 
-        return false;
-
+        // return parsed url array
+        return $parsed;
     }
 
     /** 
-     * get cache groups
+     * get requested application
      * 
-     * @return array, list of all the cache groups
+     * @return string, name of the requested application
      * 
-    */
+     */
 
-    function get_cache_groups() {
+    function get_request_app($home_app = 'Index')
+    {
 
-        $cache_groups = scandir($this->cache_path);
+        // get page url
+        $url = $this->get_url();
 
+        // check if on homepage
+        if ($url[0] == '/') {
+
+            return $home_app;
+        }
+
+        // return application name based on url
+        return $url[0];
+    }
+
+    /** 
+     * check if application exists
+     * 
+     * @param string, app name
+     * 
+     * @return bool, returns if the application name exists
+     * 
+     */
+
+    function app_exists($app)
+    {
+
+        // check if application main class exists
+        if (file_exists(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'])) . '/src/apps/' . $this->get_request_app() . '/App.php') {
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /** 
+     * check if the action exists
+     * 
+     * @param string, name of the action
+     * 
+     * @return bool, return if the action name exists
+     * 
+     */
+
+    function action_exists($action, $app = null)
+    {
+
+        // check if custom app is used or app from url
+        if ($app == null) {
+
+            $this->get_request_app();
+        }
+
+        // check if the requested action exists from the current app
+        if (file_exists(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'])) . '/src/apps/' . $app . '/controllers/' . $action . '.php') {
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /** 
+     * get all applications
+     * 
+     * @return array, array of all the applications
+     * 
+     */
+
+    function get_all_apps()
+    {
+
+        // get all files and folders form applications directory
+        $apps = scandir('src/apps/');
+
+        // dir navigation into symbols offset starting
         $dir_info = -1;
-        
+
         // loop through all dir array and remove dir info symbols [ . && .. ]
-        foreach($cache_groups as $cache_group) {
+        foreach ($apps as $app) {
 
             $dir_info++;
 
-            if($cache_group == '.' || $cache_group == '..') {
+            if ($app == '.' || $app == '..') {
 
-                unset($cache_groups[$dir_info]);
-
+                unset($apps[$dir_info]);
             }
-
         }
 
-        unset($cache_group);
+        unset($app);
 
-        $dir_info = $dir_info - count($cache_groups);
+        $dir_info = $dir_info - count($apps);
 
         // remove files from array
-        foreach($cache_groups as $cache_group) {
+        foreach ($apps as $app) {
 
             $dir_info++;
 
-            if(is_file($this->cache_path . $cache_group)) {
+            if (is_file('src/apps/' . $app)) {
 
-                unset($cache_group[$dir_info]);
-
+                unset($apps[$dir_info]);
             }
-
         }
 
-        // return groups
-        $output = $cache_groups;
+        // return applications array
+        $output = $apps;
         return $output;
-
     }
 
     /** 
-     * add a cache record
+     * check if the url action parameter was set
      * 
-     * @param string, cache group path
+     * @return bool, returns if the action url parameter was set
      * 
-     * @param string, cache record file name
-     * 
-     * @return boolean, if the record was created
-     * 
-    */
+     */
 
-    function add_record($location, $record_name) {
+    function action_isset()
+    {
 
-        // error handling
-        if(file_exists($this->cache_path . $location . '/' . $record_name)) {
+        // get request url
+        $url = $this->get_url();
 
-            error("Cache Controller: The record [ $record_name ] already exists.");
-            return false;
-
-        }
-
-        // create the record
-        fopen($this->cache_path . $location . '/' . $record_name, 'w');
-
-        // error handling
-        if(file_exists($this->cache_path . $location . '/' . $record_name)) {
+        // check if action segment was set from url
+        if (strlen($url[1]) > 0) {
 
             return true;
-
         }
 
         return false;
-
     }
 
     /** 
-     * set cache record
+     * get requested action
      * 
-     * @param string, cache group path
+     * @return string, name of the action
      * 
-     * @param string, cache record file name
-     * 
-     * @param string, record content
-     * 
-     * @return boolean, if the record was set successfully
-     * 
-    */
+     */
 
-    function set_record($location, $record_name, $content) {
+    function get_request_action($default = 'main')
+    {
 
-        // error handling
-        if(file_exists($this->cache_path . $location . '/' . $record_name)) {
+        // get request url
+        $url = $this->get_url();
 
-            error("Cache Controller: The record [ $record_name ] does not exist.");
-            return false;
+        // get the requested application action
+        if ($this->action_isset($url[1])) {
 
+            return $url[1];
         }
 
-        // write to the record
-        $record = fopen($this->cache_path . $location . '/' . $record_name, 'w');
-        fwrite($record, $content);
-        fclose($record);
-
-        // error handling
-        if(file_get_contents($this->cache_path . $location . '/' . $record_name) == $content) {
-
-            return true;
-
-        }
-
-        return false;
-
+        // return default action
+        return $default;
     }
 
     /** 
-     * get the value of a cache record
+     * get application config
      * 
-     * @param string, cache group path
+     * @param string, name of the application
      * 
-     * @param string, cache record file name
+     * @return array, json data
      * 
-     * @return string, value of the cache record
-     * 
-    */
+     */
 
-    function get_record($location, $record_name) {
+    function get_app_config($app)
+    {
 
-        // error handling
-        if(!file_exists($this->cache_path . $location . '/' . $record_name)) {
+        // get the config of an application as stdClass
+        $config = file_get_contents('src/apps/' . $app . '/config.json');
+        $json = json_decode($config);
 
-            error("Cache Controller: The record [ $record_name ] does not exist.");
-            return false;
-
-        }
-
-        // get value an return
-        $value = file_get_contents($this->cache_path . $location . '/' . $record_name);
-        return $value;
-
+        // return stdClass array
+        return $json;
     }
-
-    /** 
-     * delete a cache record
-     * 
-     * @param string, cache group path
-     * 
-     * @param string, cache record file name
-     * 
-     * @return boolean, if the cache record was deleted
-     * 
-    */
-
-    function delete_record($location, $record_name) {
-
-        // error handling
-        if(!file_exists($this->cache_path . $location . '/' . $record_name)) {
-
-            error("Cache Controller: The record [ $record_name ] does not exist.");
-            return false;
-
-        }
-
-        // delete record
-        unlink($this->cache_path . $location . '/' . $record_name);
-
-        // error handling
-        if(!file_exists($this->cache_path . $location . '/' . $record_name)) {
-
-            return true;
-
-        }
-
-        return false;
-
-    }
-
-    /** 
-     * delete cache group
-     * 
-     * @param string, group name
-     * 
-     * @return boolean, if the group was deleted
-     * 
-    */
-
-    function delete_group($location) {
-
-        // error handling
-        if(!file_exists($this->cache_path . $location)) {
-
-            error("Cache Controller: The cache group [ $location ] does not exist.");
-            return false;
-
-        }
-
-        $location = $this->cache_path . $location;
-        unset($location);
-
-        if(!file_exists($this->cache_path . $location)) {
-
-            return true;
-
-        }
-
-    }
-
 }
+
+//

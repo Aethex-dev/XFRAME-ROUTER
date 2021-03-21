@@ -1,6 +1,6 @@
 {
-    "name": "xframe/cache",
-    "description": "Cache controller for XFRAME",
+    "name": "xframe/router",
+    "description": "Default Router for XFRAME",
     "type": "package",
     "license": "MIT",
     "authors": [
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "xframe\\Cache\\": "src/"
+            "xframe\\Router\\": "src/"
         }
     }
 }
